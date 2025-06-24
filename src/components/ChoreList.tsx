@@ -1,7 +1,20 @@
 import React from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 
-const ChoreList = ({ chores }: { chores: Chore[] }) => {
+type Chore = {
+  title: string;
+  category: string;
+  recurrence: {
+    interval: number;
+    unit: string;
+  };
+};
+
+type Props = {
+  chores: Chore[];
+};
+
+const ChoreList = ({ chores }: Props) => {
   const renderItem = ({ item }: { item: Chore }) => (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -23,6 +36,7 @@ const ChoreList = ({ chores }: { chores: Chore[] }) => {
     />
   );
 };
+
 
 // You can customize this however you like
 const getCategoryColor = (category: string) => {

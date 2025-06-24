@@ -9,28 +9,30 @@ import {
   Dimensions,
   TextInput,
 } from 'react-native';
-import DropdownComponent from '../utils/Dropdown';
-import MultiSelectComponent from '../utils/Dropdown';
 import RecurrenceInput from './RecurrenceInput';
 import CategorySelector from './CategorySelector';
+import { useDispatch } from 'react-redux';
+import { addChore } from '../store/slices/choreSlice';
 
 const { height } = Dimensions.get('window');
 
 const BottomSheetForm = ({
   visible,
   onClose,
+  onAddChore,
 }: {
   visible: boolean;
   onClose: () => void;
+  onAddChore: (chore: {
+    title: string;
+    category: string;
+    recurrence: { interval: number; unit: string };
+  }) => void;
 }) => {
-      const [value, setValue] = useState('');
+  const [title, setTitle] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [recurrence, setRecurrence] = useState({ interval: 1, unit: 'days' });
 
-  const handleChange = (text) => {
-    // Only allow numeric input
-    const numericText = text.replace(/[^0-9]/g, '');
-    setValue(numericText);
-  };
-   const [selectedCategory, setSelectedCategory] = useState('');
   const slideAnim = useRef(new Animated.Value(height)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const [showModal, setShowModal] = useState(false);
@@ -70,47 +72,53 @@ const BottomSheetForm = ({
     }
   }, [visible]);
 
-  if (!showModal) return null;
+  const dispatch = useDispatch();
 
+  const handleCreate = () => {
+    if (!title.trim() || !selectedCategory || !recurrence.interval) return;
+
+    const newChore = {
+      title,
+      category: selectedCategory,
+      recurrence,
+    };
+
+    dispatch(addChore(newChore)); 
+    onClose();
+    setTitle('');
+    setSelectedCategory('');
+    setRecurrence({ interval: 1, unit: 'days' });
+  };
+
+  if (!showModal) return null;
 
   return (
     <Modal visible={showModal} transparent animationType="none" onRequestClose={onClose}>
       <View style={styles.overlay} pointerEvents="box-none">
-        <TouchableOpacity
-          style={StyleSheet.absoluteFill}
-          activeOpacity={1}
-          onPress={onClose}
-        />
-        <Animated.View
-          style={[
-            styles.sheetContainer,
-            {
-              transform: [{ translateY: slideAnim }],
-              opacity: opacityAnim,
-            },
-          ]}
-        >
-         <Text style={styles.sheetText}>Add Chore</Text>
-         <TextInput placeholder="Chore title" style={styles.inputTitle}></TextInput>
-         <Text style={{color: 'white', fontSize: 16}}>Set interval</Text>
-         <View>
-            <RecurrenceInput onChange={({ interval, unit }) => {
-  console.log('Recurrence set to:', interval, unit);
-}} />
-
-          <CategorySelector
-            selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
+        <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={onClose} />
+        <Animated.View style={[styles.sheetContainer, { transform: [{ translateY: slideAnim }], opacity: opacityAnim }]}>
+          <Text style={styles.sheetText}>Add Chore</Text>
+          <TextInput
+            placeholder="Chore title"
+            value={title}
+            onChangeText={setTitle}
+            style={styles.inputTitle}
+            placeholderTextColor="gray"
           />
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}><Text style={styles.buttonText}>Create</Text></TouchableOpacity>
-         </View>
 
+          <Text style={{ color: 'white', fontSize: 16 }}>Set interval</Text>
+          <RecurrenceInput onChange={setRecurrence} />
+
+          <CategorySelector selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
+
+          <TouchableOpacity style={styles.closeButton} onPress={handleCreate}>
+            <Text style={styles.buttonText}>Create</Text>
+          </TouchableOpacity>
         </Animated.View>
       </View>
     </Modal>
   );
 };
-
 export default BottomSheetForm;
 
 const styles = StyleSheet.create({
@@ -130,9 +138,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginBottom: 20,
     color: 'white',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   closeButton: {
+    marginTop: 20,
     padding: 12,
     backgroundColor: 'orange',
     borderRadius: 8,
@@ -140,7 +149,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     textAlign: 'center',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   inputTitle: {
     height: 50,
@@ -150,18 +159,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 14,
     fontWeight: 'bold',
-  },
-  inputNumber: {
-    marginTop: 10,
-    height: 50,
-    borderColor: '#999',
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
     color: 'white',
-    width: '20%',
-    borderRadius: 10
   },
 });

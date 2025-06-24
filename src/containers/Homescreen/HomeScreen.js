@@ -8,6 +8,11 @@ import ChoreList from '../../components/ChoreList';
 
 const HomeScreen = () => {
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
+  const [chores, setChores] = useState([
+    { title: 'Wash dishes', category: 'Kitchen', recurrence: { interval: 1, unit: 'days' } },
+    { title: 'Study math', category: 'Study', recurrence: { interval: 2, unit: 'days' } },
+  ]);
+   console.log('Current chores:', chores);
 
   const handleOpenBottomSheet = () => {
     setIsBottomSheetVisible(true);
@@ -17,24 +22,26 @@ const HomeScreen = () => {
     setIsBottomSheetVisible(false);
   };
 
+  const handleAddChore = (newChore) => {
+    setChores((prevChores) => [...prevChores, newChore]);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Header />
       <CalendarWeek />
       <Text style={styles.header}>Today's tasks</Text>
-      <ChoreList
-  chores={[
-    { title: 'Wash dishes', category: 'Kitchen', recurrence: { interval: 1, unit: 'days' } },
-    { title: 'Study math', category: 'Study', recurrence: { interval: 2, unit: 'days' } },
-  ]}
-/>
-
+      <ChoreList chores={chores} />
 
       <TouchableOpacity style={styles.addButton} onPress={handleOpenBottomSheet}>
         <Text style={{ color: 'white', fontSize: 30 }}>+</Text>
       </TouchableOpacity>
 
-      <BottomSheetForm visible={isBottomSheetVisible} onClose={handleCloseBottomSheet} />
+      <BottomSheetForm
+        visible={isBottomSheetVisible}
+        onClose={handleCloseBottomSheet}
+        onAddChore={handleAddChore} // <-- Pass it here
+      />
     </SafeAreaView>
   );
 };
