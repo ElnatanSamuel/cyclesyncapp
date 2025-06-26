@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSelector } from 'react-redux';
+
 import CalendarWeek from '../../components/CalenderDate';
 import Header from '../../components/Header';
 import BottomSheetForm from '../../components/BottomSheetForm';
 import ChoreList from '../../components/ChoreList';
+import { RootState } from '../../store/store';
 
 const HomeScreen = () => {
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
-  const [chores, setChores] = useState([
-    { title: 'Wash dishes', category: 'Kitchen', recurrence: { interval: 1, unit: 'days' } },
-    { title: 'Study math', category: 'Study', recurrence: { interval: 2, unit: 'days' } },
-  ]);
-   console.log('Current chores:', chores);
+  const chores = useSelector((state: RootState) => state.chores.items);
 
   const handleOpenBottomSheet = () => {
     setIsBottomSheetVisible(true);
@@ -20,10 +19,6 @@ const HomeScreen = () => {
 
   const handleCloseBottomSheet = () => {
     setIsBottomSheetVisible(false);
-  };
-
-  const handleAddChore = (newChore) => {
-    setChores((prevChores) => [...prevChores, newChore]);
   };
 
   return (
@@ -40,7 +35,6 @@ const HomeScreen = () => {
       <BottomSheetForm
         visible={isBottomSheetVisible}
         onClose={handleCloseBottomSheet}
-        onAddChore={handleAddChore} // <-- Pass it here
       />
     </SafeAreaView>
   );

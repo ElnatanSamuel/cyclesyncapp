@@ -1,5 +1,8 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { deleteChore, selectChores } from '../store/slices/choreSlice';
+import Icon from '@react-native-vector-icons/ionicons';
 
 type Chore = {
   title: string;
@@ -10,22 +13,33 @@ type Chore = {
   };
 };
 
-type Props = {
-  chores: Chore[];
-};
+const ChoreList = () => {
+  const chores = useSelector(selectChores);
 
-const ChoreList = ({ chores }: Props) => {
-  const renderItem = ({ item }: { item: Chore }) => (
-    <View style={styles.card}>
-      <View style={styles.header}>
+   const dispatch = useDispatch();
+
+  const handleDelete = (index: number) => {
+    dispatch(deleteChore(index));
+  };
+
+const renderItem = ({ item, index }: { item: typeof chores[0], index: number }) => (
+  <View style={styles.card}>
+    <View style={styles.header}>
+      <View style={styles.titleCategory}>
         <Text style={styles.title}>{item.title}</Text>
         <View style={[styles.categoryTag, { backgroundColor: getCategoryColor(item.category) }]}>
           <Text style={styles.categoryText}>{item.category}</Text>
         </View>
       </View>
-      <Text style={styles.recurrence}>Every {item.recurrence.interval} {item.recurrence.unit}</Text>
+
+      <TouchableOpacity onPress={() => handleDelete(index)} style={styles.deleteButton}>
+        <Icon name="trash" size={24} color="red" />
+      </TouchableOpacity>
     </View>
-  );
+
+    <Text style={styles.recurrence}>Every {item.recurrence.interval} {item.recurrence.unit}</Text>
+  </View>
+);
 
   return (
     <FlatList
@@ -36,6 +50,7 @@ const ChoreList = ({ chores }: Props) => {
     />
   );
 };
+
 
 
 // You can customize this however you like
@@ -71,10 +86,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
+  titleCategory: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   title: {
     fontSize: 18,
     color: 'white',
     fontWeight: '600',
+    marginRight: 12,
   },
   categoryTag: {
     paddingHorizontal: 10,
@@ -86,10 +106,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
   },
+  deleteButton: {
+    padding: 8,
+    borderRadius: 8,
+  },
   recurrence: {
     color: '#ccc',
     fontSize: 14,
   },
 });
+
 
 export default ChoreList;

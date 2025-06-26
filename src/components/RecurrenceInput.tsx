@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
-const RecurrenceInput = ({ onChange }) => {
+const RecurrenceInput = ({ onChange  }) => {
   const [number, setNumber] = useState('1');
   const [unit, setUnit] = useState('days');
 

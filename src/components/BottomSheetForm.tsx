@@ -19,15 +19,9 @@ const { height } = Dimensions.get('window');
 const BottomSheetForm = ({
   visible,
   onClose,
-  onAddChore,
 }: {
   visible: boolean;
   onClose: () => void;
-  onAddChore: (chore: {
-    title: string;
-    category: string;
-    recurrence: { interval: number; unit: string };
-  }) => void;
 }) => {
   const [title, setTitle] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');

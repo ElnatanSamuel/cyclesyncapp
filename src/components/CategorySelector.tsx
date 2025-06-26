@@ -1,67 +1,70 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-
-const initialCategories = [
-  'Personal',
-  'Work',
-  'Study',
-  'Fitness',
-  'Hobbies',
-  'Household',
-  'Other',
-];
+import { useDispatch, useSelector } from 'react-redux';
+import { addCategory, selectCategories } from '../store/slices/categorySlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CategorySelector = ({ selectedCategory, onSelectCategory }) => {
-  const [categories, setCategories] = useState(initialCategories);
+  const categories = useSelector(selectCategories);
+  const dispatch = useDispatch();
+  useEffect(() => {
+  AsyncStorage.getItem('categories').then(data => {
+    console.log('Categories in storage:', data);
+  });
+}, [categories]);
+
   const [addingNew, setAddingNew] = useState(false);
   const [newCategory, setNewCategory] = useState('');
 
-  const addCategory = () => {
+  useEffect(() => {
+    if (selectedCategory === '__add_new') {
+      setAddingNew(true);
+    }
+  }, [selectedCategory]);
+
+  const handleAdd = () => {
     const trimmed = newCategory.trim();
     if (trimmed && !categories.includes(trimmed)) {
-      setCategories([...categories, trimmed]);
+      dispatch(addCategory(trimmed));
       onSelectCategory(trimmed);
-      setNewCategory('');
-      setAddingNew(false);
     }
+    setAddingNew(false);
+    setNewCategory('');
   };
 
   return (
     <View style={styles.container}>
       {!addingNew ? (
-        <>
-          <Picker
-            selectedValue={selectedCategory}
-            style={styles.picker}
-            onValueChange={(itemValue) => onSelectCategory(itemValue)}
-          >
-            <Picker.Item label="Select category..." value="" />
-            {categories.map((cat) => (
-              <Picker.Item key={cat} label={cat} value={cat} />
-            ))}
-            <Picker.Item label="➕ Add new category" value="__add_new" />
-          </Picker>
-
-          {selectedCategory === '__add_new' && setAddingNew(true)}
-        </>
+        <Picker
+          selectedValue={selectedCategory}
+          style={styles.picker}
+          onValueChange={(value) => onSelectCategory(value)}
+        >
+          <Picker.Item label="Select category..." value="" />
+          {categories.map((cat) => (
+            <Picker.Item key={cat} label={cat} value={cat} />
+          ))}
+          <Picker.Item label="➕ Add new category" value="__add_new" />
+        </Picker>
       ) : (
         <View style={styles.addNewContainer}>
           <TextInput
             style={styles.input}
             placeholder="New category name"
+            placeholderTextColor="#aaa"
             value={newCategory}
             onChangeText={setNewCategory}
           />
-          <TouchableOpacity style={styles.addButton} onPress={addCategory}>
+          <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
             <Text style={styles.addButtonText}>Add</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.cancelButton}
             onPress={() => {
               setAddingNew(false);
-              onSelectCategory(''); // Reset selection
               setNewCategory('');
+              onSelectCategory('');
             }}
           >
             <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -86,7 +89,6 @@ const styles = StyleSheet.create({
   },
   addNewContainer: {
     flexDirection: 'row',
-    color: '#666',
     alignItems: 'center',
     paddingHorizontal: 10,
     paddingVertical: 8,

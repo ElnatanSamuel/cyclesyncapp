@@ -1,4 +1,6 @@
+// store/slices/choreSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { RootState } from '../store';
 
 export type Chore = {
   title: string;
@@ -9,26 +11,24 @@ export type Chore = {
   };
 };
 
-type ChoreState = {
-  items: Chore[];
-};
-
-const initialState: ChoreState = {
-  items: [],
-};
+const initialState: Chore[] = [];
 
 const choreSlice = createSlice({
   name: 'chores',
   initialState,
   reducers: {
     addChore: (state, action: PayloadAction<Chore>) => {
-      state.items.push(action.payload);
+      state.push(action.payload);
     },
-    removeChore: (state, action: PayloadAction<number>) => {
-      state.items.splice(action.payload, 1);
+    setChores: (_state, action: PayloadAction<Chore[]>) => {
+      return action.payload;
+    },
+    deleteChore: (state, action: PayloadAction<number>) => {
+      state.splice(action.payload, 1);
     },
   },
 });
 
-export const { addChore, removeChore } = choreSlice.actions;
+export const { addChore, setChores, deleteChore } = choreSlice.actions;
+export const selectChores = (state: RootState) => state.chores;
 export default choreSlice.reducer;
